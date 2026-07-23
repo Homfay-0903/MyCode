@@ -37,7 +37,7 @@
 ### 1. 克隆和安装
 
 ```bash
-git clone <your-repo-url>
+git clone
 cd mycode
 bun install
 ```
