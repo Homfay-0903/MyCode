@@ -9,6 +9,8 @@ import billing from "./routes/billing";
 
 const app = new Hono();
 
+app.get("/health", (c) => c.json({ ok: true }));
+
 app.onError((error, c) => {
   if (error instanceof HTTPException) {
     return c.json({
@@ -33,4 +35,4 @@ const routes = app
 
 export type AppType = typeof routes;
 // idleTimeout must be high, otherwise LLM tool calls might not complete
-export default { port: 3000, fetch: app.fetch, idleTimeout: 255 };
+export default { port: Number(process.env.PORT ?? 3000), fetch: app.fetch, idleTimeout: 255 };
