@@ -19,7 +19,7 @@ app.onError((error, c) => {
   };
 
   console.error("Unhandled server error", error);
-  return c.json({ error: "Internal server error" }, 500);
+  return c.json({ error: error instanceof Error ? error.message : "Internal server error" }, 500);
 });
 
 app.use("/sessions/*", requireAuth);
