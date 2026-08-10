@@ -1,7 +1,7 @@
 FROM oven/bun:1 AS build
 WORKDIR /app
 
-COPY package.json bun.lock ./
+COPY package.json bun.lock tsconfig.base.json ./
 COPY packages ./packages
 
 RUN bun install --frozen-lockfile
@@ -14,7 +14,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY --from=build /app/package.json ./
-COPY --from=build /app/bun.lock ./
+COPY --from=build /app/bun.lock ./bun.lock
+COPY --from=build /app/tsconfig.base.json ./tsconfig.base.json
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/packages ./packages
 
