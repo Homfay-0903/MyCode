@@ -19,4 +19,4 @@ COPY --from=build /app/tsconfig.base.json ./tsconfig.base.json
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/packages ./packages
 
-CMD ["sh", "-c", "bun run --cwd packages/database db:push && bun --cwd packages/server dist/index.js"]
+CMD ["sh", "-c", "echo [deploy] syncing database...; bun run --cwd packages/database db:push && echo [deploy] database ready, starting server...; bun --cwd packages/server dist/index.js"]
