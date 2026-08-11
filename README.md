@@ -27,7 +27,7 @@
 
 ## 环境要求
 
-- [Bun](https://bun.sh) 运行时
+- [Bun](https://bun.sh) 运行时（推荐 1.x；Prisma 7 需要 Bun 或 Node 20+，旧版 Node 无法运行）
 - PostgreSQL数据库（如Neon）
 - [Clerk](https://clerk.com) OAuth应用配置
 - AI模型API密钥（GLM或DeepSeek）
@@ -98,8 +98,47 @@ bun run dev:cli
 
 ```bash
 bun run link:cli
+```
+
+## 像 opencode 一样使用 mycode
+
+`bun run link:cli` 会将 `mycode` 全局链接到系统 PATH（Bun 的全局 bin 目录），之后**在任何目录**打开终端直接输入 `mycode` 即可启动编程助手，无需进入项目目录：
+
+```bash
 mycode
 ```
+
+### 连接云端后端（推荐）
+
+在 `.env` 中配置 `API_URL` 指向已部署的服务（例如 Railway 域名），CLI 即可直连云端 API、持久化会话，本机只负责终端界面与本地文件工具：
+
+```bash
+API_URL=https://your-service.up.railway.app
+```
+
+### 本地开发模式
+
+未配置 `API_URL` 时默认连接 `http://localhost:3000`，需先启动后端：
+
+```bash
+bun run dev:server   # 终端1：启动 API
+mycode               # 终端2：启动 CLI
+```
+
+> 提示：若本地同时维护多个项目，无需反复安装——`bun link` 是全局注册，源码改动即时生效。
+
+## 部署到 Railway
+
+项目内置 `Dockerfile`（纯 Bun 多阶段构建）与 `railway.json`，部署步骤：
+
+1. 推送代码到 GitHub，在 Railway 新建项目并部署该仓库
+2. 添加 **Postgres 插件**，并在 server 服务里 Reference 它的 `DATABASE_URL`
+3. server 服务 Variables 配置 AI 密钥（`DEEPSEEK_API_KEY` 等至少一个）与 Clerk 密钥组
+4. **Start Command 留空**（由镜像内置命令先 `db:push` 建表再启动服务）
+5. 复制服务公网域名，在 Clerk OAuth Application 的 Redirect URLs 注册 `https://<domain>/auth/callback`
+6. 本地 `.env` 的 `API_URL` 填 `https://<domain>`
+
+完整的排障记录与部署细节见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
 
 ## 项目结构
 
@@ -126,8 +165,9 @@ packages/
 | `bun run dev:cli`                             | 启动CLI（监听模式）          |
 | `bun run dev:server`                          | 启动Hono服务器（热重载）     |
 | `bun run build:cli`                           | 构建CLI包                    |
-| `bun run link:cli`                            | 构建并链接`mycode`可执行文件 |
+| `bun run link:cli`                            | 构建并全局链接`mycode`可执行文件（任意目录可用） |
 | `bun run --cwd packages/database db:generate` | 生成Prisma客户端             |
+| `bun run --cwd packages/database db:push`     | 同步Prisma schema到数据库    |
 
 ## 包说明
 
